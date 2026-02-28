@@ -1,0 +1,104 @@
+---
+title: Error Codes
+description: 'Complete list of error codes and their meanings'
+---
+
+# Error Codes
+
+NFI Clear API uses conventional HTTP response codes and provides detailed error codes in the response body.
+
+## HTTP Status Codes
+
+| Code | Status | Description |
+|------|--------|-------------|
+| 200 | OK | Request succeeded |
+| 201 | Created | Resource created successfully |
+| 400 | Bad Request | Invalid request parameters |
+| 401 | Unauthorized | Invalid or missing API key |
+| 403 | Forbidden | Insufficient permissions or subscription issues |
+| 404 | Not Found | Resource not found |
+| 409 | Conflict | Resource already exists or conflict |
+| 500 | Internal Server Error | Server-side error |
+
+## API Error Codes
+
+### Authentication Errors
+
+| Code | HTTP | Description |
+|------|------|-------------|
+| `MISSING_API_KEY` | 401 | No API key provided |
+| `INVALID_API_KEY` | 401 | API key invalid or doesn't exist |
+| `REVOKED_API_KEY` | 401 | API key has been revoked |
+| `EXPIRED_API_KEY` | 401 | API key has expired |
+| `INSUFFICIENT_PERMISSIONS` | 403 | API key lacks required permissions |
+
+### Subscription Errors
+
+| Code | HTTP | Description |
+|------|------|-------------|
+| `NO_ACTIVE_SUBSCRIPTION` | 403 | No active subscription found |
+| `LIMIT_EXCEEDED` | 403 | Monthly verification limit reached |
+
+### Validation Errors
+
+| Code | HTTP | Description |
+|------|------|-------------|
+| `INVALID_SUBJECT_TYPE` | 400 | subjectType must be "kyc" or "kyb" |
+| `MISSING_SUBJECT_REFERENCE` | 400 | subjectReference is required |
+
+### Resource Errors
+
+| Code | HTTP | Description |
+|------|------|-------------|
+| `VERIFICATION_NOT_FOUND` | 404 | Verification ID not found |
+| `DUPLICATE_SUBJECT_REFERENCE` | 409 | Active verification already exists |
+
+## Error Response Format
+
+All errors follow this format:
+
+```json
+{
+  "success": false,
+  "error": "Human-readable error message",
+  "code": "ERROR_CODE"
+}
+```
+
+## Handling Errors
+
+### Example Error Handler
+
+```javascript
+const makeRequest = async (url, options) => {
+  const response = await fetch(url, options);
+  const data = await response.json();
+  
+  if (!data.success) {
+    switch (data.code) {
+      case 'NO_ACTIVE_SUBSCRIPTION':
+        // Handle subscription issue
+        showSubscriptionModal();
+        break;
+      case 'LIMIT_EXCEEDED':
+        // Handle limit exceeded
+        showUpgradePrompt();
+        break;
+      case 'DUPLICATE_SUBJECT_REFERENCE':
+        // Use existing verification
+        return handleDuplicate(data.data.existingVerificationId);
+      default:
+        throw new Error(data.error);
+    }
+  }
+  
+  return data;
+};
+```
+
+## Getting Help
+
+If you encounter errors not listed here, contact support with:
+- The error code
+- The request that caused it
+- The timestamp of the request

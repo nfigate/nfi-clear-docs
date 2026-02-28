@@ -1,0 +1,134 @@
+---
+title: Error Handling
+description: 'Best practices for handling API errors'
+---
+
+# Error Handling
+
+Proper error handling is crucial for building robust integrations.
+
+## General Principles
+
+1. **Always check the `success` field** - Don't rely solely on HTTP status codes
+2. **Handle errors gracefully** - Provide fallback behavior for users
+3. **Log errors with context** - Include request details for debugging
+4. **Never expose API keys** - In error logs or user-facing messages
+
+## Error Categories
+
+### Client Errors (4xx)
+
+These errors indicate a problem with your request. Do not retry - fix the issue first.
+
+```javascript
+const handleClientError = (error) => {
+  switch (error.code) {
+    case 'MISSING_API_KEY':
+    case 'INVALID_API_KEY':
+    case 'REVOKED_API_KEY':
+      // Configuration issue - alert admin immediately
+      alertAdmin('API Key Issue', error);
+      break;
+      
+    case 'NO_ACTIVE_SUBSCRIPTION':
+      // Show subscription modal
+      showSubscriptionModal();
+      break;
+      
+    case 'LIMIT_EXCEEDED':
+      // Show upgrade prompt
+      showUpgradePrompt();
+      break;
+      
+    case 'DUPLICATE_SUBJECT_REFERENCE':
+      // Use existing verification
+      return handleDuplicateVerification(error.data.existingVerificationId);
+      
+    default:
+      logError('Client Error', error);
+  }
+};
+```
+
+### Server Errors (5xx)
+
+These are temporary issues. Retry with exponential backoff.
+
+```javascript
+const handleServerError = async (request, attempt = 0) => {
+  const maxRetries = 3;
+  const baseDelay = 1000;
+  
+  try {
+    return await makeRequest(request);
+  } catch (error) {
+    if (attempt >= maxRetries) {
+      throw error;
+    }
+    
+    const delay = baseDelay * Math.pow(2, attempt);
+    await sleep(delay);
+    
+    return handleServerError(request, attempt + 1);
+  }
+};
+```
+
+## User-Facing Messages
+
+Map technical errors to user-friendly messages:
+
+```javascript
+const errorMessages = {
+  NO_ACTIVE_SUBSCRIPTION: {
+    title: 'Subscription Required',
+    message: 'Please activate a subscription to create verifications.',
+  },
+  LIMIT_EXCEEDED: {
+    title: 'Limit Reached',
+    message: 'You have reached your monthly verification limit.',
+  },
+  DUPLICATE_SUBJECT_REFERENCE: {
+    title: 'Verification Exists',
+    message: 'A verification is already in progress for this user.',
+  },
+  VERIFICATION_NOT_FOUND: {
+    title: 'Not Found',
+    message: 'The requested verification could not be found.',
+  },
+  default: {
+    title: 'Error',
+    message: 'Something went wrong. Please try again later.',
+  },
+};
+```
+
+## Logging
+
+Always log errors with sufficient context:
+
+```javascript
+const logError = (error, context) => {
+  const logEntry = {
+    timestamp: new Date().toISOString(),
+    code: error.code,
+    message: error.message,
+    endpoint: context.endpoint,
+    method: context.method,
+    // Never log API keys
+  };
+  
+  logger.error('API Error', logEntry);
+};
+```
+
+## Testing Error Handling
+
+Test your error handling with these scenarios:
+
+1. Invalid API key
+2. Revoked API key
+3. Expired subscription
+4. Invalid request parameters
+5. Duplicate subject reference
+6. Network timeout

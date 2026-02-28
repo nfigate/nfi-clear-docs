@@ -1,0 +1,154 @@
+---
+title: Authentication
+description: 'The NFI Clear API uses API keys to authenticate requests. You can create and manage API keys from your [dashboard](https://app.nfi-clear.com/client/api-keys).'
+---
+
+## API Key Format
+
+API keys follow this format:
+
+```
+nfi_<64-character-hexadecimal-string>
+```
+
+Example:
+```
+nfi_a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456
+```
+
+## Using API Keys
+
+Include your API key in the `X-API-Key` header for all API requests:
+
+```bash
+curl -X POST 'https://api.nfi-clear.com/api/v1/verifications' \
+  -H 'X-API-Key: nfi_your_api_key_here' \
+  -H 'Content-Type: application/json' \
+  -d '{"subjectType":"kyc","subjectReference":"user-123"}'
+```
+
+## Permissions
+
+API keys can have the following permissions:
+
+| Permission | Description |
+|------------|-------------|
+| `verifications:create` | Create new verification requests |
+| `verifications:read` | Read verification status and details |
+| `*` | Full access (all permissions) |
+
+## Security Best Practices
+
+<Warning>
+  Keep your API keys secure! Never expose them in client-side code or public repositories.
+</Warning>
+
+### Do's ✅
+
+- Store API keys in environment variables
+- Use separate keys for different environments (dev/staging/prod)
+- Rotate keys regularly (every 90 days recommended)
+- Set expiration dates for temporary keys
+- Revoke unused keys immediately
+
+### Don'ts ❌
+
+- Don't hardcode API keys in your code
+- Don't commit API keys to version control
+- Don't share API keys via email or chat
+- Don't use the same key across multiple applications
+
+## Key Management
+
+### Maximum Keys
+
+Each client can have up to **10 active API keys** at a time. Revoke unused keys before creating new ones.
+
+### Key Expiration
+
+You can set optional expiration dates when creating keys:
+
+- 30 days
+- 90 days
+- 180 days
+- 365 days
+
+Expired keys will return a `401 Unauthorized` error.
+
+### Revoking Keys
+
+Revoked keys are immediately disabled and cannot be reactivated. All requests with revoked keys will return:
+
+```json
+{
+  "success": false,
+  "error": "API key has been revoked"
+}
+```
+
+## Rate Limiting
+
+API requests are rate-limited based on your subscription plan:
+
+| Plan | Rate Limit |
+|------|------------|
+| Standard | 100 requests/minute |
+| Enterprise | 500 requests/minute |
+
+Rate limit headers are included in all responses:
+
+```http
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 95
+X-RateLimit-Reset: 1640995200
+```
+
+## Error Responses
+
+### Invalid API Key
+
+```json
+{
+  "success": false,
+  "error": "Invalid API key"
+}
+```
+
+### Missing API Key
+
+```json
+{
+  "success": false,
+  "error": "API key is required. Provide it in X-API-Key header."
+}
+```
+
+### Insufficient Permissions
+
+```json
+{
+  "success": false,
+  "error": "Insufficient permissions"
+}
+```
+
+## Testing Authentication
+
+Test your API key with a simple request:
+
+```bash
+curl 'https://api.nfi-clear.com/api/v1/verifications' \
+  -H 'X-API-Key: nfi_your_api_key_here'
+```
+
+A successful response confirms your key is valid:
+
+```json
+{
+  "success": true,
+  "data": {
+    "verifications": [],
+    "pagination": { ... }
+  }
+}
+```

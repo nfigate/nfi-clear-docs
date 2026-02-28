@@ -1,0 +1,60 @@
+{
+  "name": "NFI Clear API",
+  "logo": {
+    "dark": "/logo/dark.svg",
+    "light": "/logo/light.svg"
+  },
+  "favicon": "/favicon.svg",
+  "colors": {
+    "primary": "#00b262",
+    "light": "#22C55E",
+    "dark": "#00b262",
+    "background": {
+      "dark": "#0F1419",
+      "light": "#FAFBFC"
+    }
+  },
+  "navigation": [
+    {
+      "group": "Getting Started",
+      "pages": [
+        "introduction",
+        "quickstart",
+        "authentication"
+      ]
+    },
+    {
+      "group": "Core Concepts",
+      "pages": [
+        "concepts/verifications",
+        "concepts/kyc-flow",
+        "concepts/kyb-flow"
+      ]
+    },
+    {
+      "group": "API Reference",
+      "pages": [
+        "api-reference/overview",
+        {
+          "group": "Verifications",
+          "pages": [
+            "api-reference/verifications/create",
+            "api-reference/verifications/list",
+            "api-reference/verifications/get",
+            "api-reference/verifications/details"
+          ]
+        },
+        {
+          "group": "Errors",
+          "pages": [
+            "api-reference/errors/codes",
+            "api-reference/errors/handling"
+          ]
+        }
+      ]
+    }
+  ],
+  "footerSocials": {
+    "website": "https://nfi-clear.com"
+  }
+}

@@ -1,0 +1,165 @@
+---
+title: Create Verification
+description: 'Create a new KYC or KYB verification'
+api: 'POST /api/v1/verifications'
+---
+
+# Create Verification
+
+Create a new verification request for an individual (KYC) or business (KYB).
+
+## Endpoint
+
+```http
+POST /api/v1/verifications
+```
+
+## Request
+
+### Headers
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| X-API-Key | Yes | Your API key |
+| Content-Type | Yes | Must be `application/json` |
+
+### Body Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| subjectType | string | Yes | Type of verification: `kyc` or `kyb` |
+| subjectReference | string | Yes | Your unique identifier for this subject |
+| metadata | object | No | Additional data to store with the verification |
+
+### Example Request
+
+```bash
+curl -X POST 'https://api.nfi-clear.com/api/v1/verifications' \
+  -H 'X-API-Key: nfi_your_api_key_here' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "subjectType": "kyc",
+    "subjectReference": "user-12345",
+    "metadata": {
+      "customerId": "cus_12345",
+      "source": "mobile_app",
+      "userEmail": "user@example.com"
+    }
+  }'
+```
+
+## Response
+
+### Success (201 Created)
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "abc123def456",
+    "type": "kyc",
+    "subjectReference": "user-12345",
+    "status": "pending",
+    "requestedAt": "2024-01-15T10:30:00.000Z",
+    "currentStep": 0,
+    "verificationUrl": "https://app.nfi-clear.com/verify/abc123def456"
+  },
+  "message": "Verification created successfully"
+}
+```
+
+### Response Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | string | Unique verification ID |
+| type | string | `kyc` or `kyb` |
+| subjectReference | string | Your reference ID |
+| status | string | Current status: `pending` |
+| requestedAt | string | ISO 8601 timestamp |
+| currentStep | number | Current step in verification flow |
+| verificationUrl | string | URL to send to the user |
+
+## Error Responses
+
+### Invalid Subject Type (400)
+
+```json
+{
+  "success": false,
+  "error": "subjectType must be \"kyc\" or \"kyb\""
+}
+```
+
+### Missing Subject Reference (400)
+
+```json
+{
+  "success": false,
+  "error": "subjectReference is required"
+}
+```
+
+### No Active Subscription (403)
+
+```json
+{
+  "success": false,
+  "error": "No active subscription",
+  "code": "NO_ACTIVE_SUBSCRIPTION"
+}
+```
+
+### Limit Exceeded (403)
+
+```json
+{
+  "success": false,
+  "error": "Verification limit exceeded. Please upgrade your subscription.",
+  "code": "LIMIT_EXCEEDED"
+}
+```
+
+### Duplicate Subject Reference (409)
+
+```json
+{
+  "success": false,
+  "error": "An active verification already exists for this subject reference",
+  "code": "DUPLICATE_SUBJECT_REFERENCE",
+  "data": {
+    "existingVerificationId": "abc123..."
+  }
+}
+```
+
+## Flow
+
+After creating a verification:
+
+1. Store the `id` in your database
+2. Send the `verificationUrl` to your user
+3. User completes the verification form
+4. Receive webhook notification on completion
+5. Fetch full details using [Get Details](/api-reference/verifications/details) endpoint
+
+## Metadata Usage
+
+The `metadata` field accepts any JSON object. This is useful for:
+
+- Storing your internal IDs
+- Tracking the source of the verification
+- Adding custom tags
+- Storing user contact information
+
+<Info>
+  Metadata is returned in all verification responses and webhook payloads.
+</Info>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="List Verifications" icon="list" href="/api-reference/verifications/list">
+    View all your verifications
+  </Card>
+</CardGroup>

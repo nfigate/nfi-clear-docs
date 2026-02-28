@@ -1,0 +1,113 @@
+---
+title: Overview
+description: 'NFI Clear API reference overview'
+---
+
+# API Reference
+
+The NFI Clear API is organized around REST. Our API has predictable resource-oriented URLs, accepts JSON-encoded request bodies, returns JSON-encoded responses, and uses standard HTTP response codes, authentication, and verbs.
+
+## Base URL
+
+```
+https://api.nfi-clear.com/api/v1
+```
+
+## Content Type
+
+All requests should include the `Content-Type: application/json` header when sending JSON data.
+
+## Response Format
+
+All API responses follow a consistent format:
+
+```json
+{
+  "success": true,
+  "data": { ... },
+  "message": "Optional success message"
+}
+```
+
+### Error Response
+
+```json
+{
+  "success": false,
+  "error": "Error description",
+  "code": "ERROR_CODE"
+}
+```
+
+## HTTP Status Codes
+
+| Code | Meaning |
+|------|---------|
+| 200 | OK - Request succeeded |
+| 201 | Created - Resource created successfully |
+| 400 | Bad Request - Invalid parameters |
+| 401 | Unauthorized - Invalid or missing API key |
+| 403 | Forbidden - Insufficient permissions |
+| 404 | Not Found - Resource not found |
+| 409 | Conflict - Resource already exists |
+| 500 | Internal Server Error - Server error |
+
+## Endpoints Overview
+
+### Verifications
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/verifications` | [Create verification](/api-reference/verifications/create) |
+| GET | `/verifications` | [List verifications](/api-reference/verifications/list) |
+| GET | `/verifications/:id` | [Get verification](/api-reference/verifications/get) |
+| GET | `/verifications/:id/details` | [Get full details](/api-reference/verifications/details) |
+
+## Pagination
+
+List endpoints support pagination using `page` and `limit` query parameters:
+
+```bash
+curl 'https://api.nfi-clear.com/api/v1/verifications?page=1&limit=20' \
+  -H 'X-API-Key: nfi_your_api_key'
+```
+
+### Pagination Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "verifications": [...],
+    "pagination": {
+      "page": 1,
+      "limit": 20,
+      "totalCount": 150,
+      "totalPages": 8,
+      "hasMore": true
+    }
+  }
+}
+```
+
+## Filtering
+
+Use query parameters to filter results:
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `status` | string | Filter by status: `pending`, `submitted`, `action_needed`, `approved`, `rejected` |
+| `type` | string | Filter by type: `kyc`, `kyb` |
+| `subjectReference` | string | Search by subject reference |
+| `sortBy` | string | Sort field (default: `requestedAt`) |
+| `sortOrder` | string | Sort order: `asc`, `desc` (default: `desc`) |
+
+Example:
+```bash
+curl 'https://api.nfi-clear.com/api/v1/verifications?status=pending&type=kyc' \
+  -H 'X-API-Key: nfi_your_api_key'
+```
+
+## Testing
+
+All endpoints include cURL examples. Replace `nfi_your_api_key` with your actual API key.

@@ -1,0 +1,243 @@
+---
+title: Get Verification Details
+description: 'Get complete verification details including progress and submitted data'
+api: 'GET /api/v1/verifications/{id}/details'
+---
+
+# Get Verification Details
+
+Retrieve complete information about a verification, including:
+- Full progress tracking
+- Step history
+- Access logs
+- All submitted data
+- Sub-step tracking for KYB
+
+## Endpoint
+
+```http
+GET /api/v1/verifications/{id}/details
+```
+
+## Path Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| id | string | Yes | The verification ID |
+
+## Request
+
+### Headers
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| X-API-Key | Yes | Your API key |
+
+### Example Request
+
+```bash
+curl 'https://api.nfi-clear.com/api/v1/verifications/abc123def456/details' \
+  -H 'X-API-Key: nfi_your_api_key_here'
+```
+
+## Response
+
+### Success (200 OK)
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "abc123def456",
+    "type": "kyb",
+    "subjectReference": "company-12345",
+    "status": "submitted",
+    "requestedAt": "2024-01-15T10:30:00.000Z",
+    "resolvedAt": null,
+    "resolutionNotes": null,
+    "subscriptionName": "Standard Plan",
+    "verificationUrl": "https://app.nfi-clear.com/verify/abc123def456",
+    "progress": {
+      "currentStep": 7,
+      "stepHistory": [
+        { "step": 1, "stepName": "Company Info", "completedAt": "2024-01-15T10:35:00Z" },
+        { "step": 2, "stepName": "Entity Type", "completedAt": "2024-01-15T10:36:00Z" },
+        { "step": 3, "stepName": "Business Details", "completedAt": "2024-01-15T10:40:00Z" },
+        { "step": 4, "stepName": "Document Upload", "completedAt": "2024-01-15T10:45:00Z" },
+        { "step": 5, "stepName": "Financial Info", "completedAt": "2024-01-15T10:50:00Z" },
+        { "step": 6, "stepName": "Connected Parties", "completedAt": "2024-01-15T10:55:00Z" },
+        { "step": 7, "stepName": "Corporate Governance", "completedAt": "2024-01-15T10:58:00Z" }
+      ],
+      "lastUpdated": "2024-01-15T10:58:00Z",
+      "currentAccountTypeStep": 3,
+      "currentDocumentStep": 4,
+      "currentFinancialStep": 3,
+      "currentConnectedPartiesStep": 4,
+      "currentCorporateGovernanceStep": 2
+    },
+    "accessLog": [
+      {
+        "timestamp": "2024-01-15T10:30:00Z",
+        "ip": "192.168.1.1",
+        "device": "Desktop",
+        "browser": "Chrome 120.0",
+        "os": "macOS 14.2"
+      }
+    ],
+    "submittedData": {
+      "companyInfo": {
+        "contactName": "John Doe",
+        "contactInfo": "+65 9123 4567",
+        "contactChannel": "telegram",
+        "legalEntityName": "Acme Pte Ltd",
+        "salesRep": "Jane Smith",
+        "language": "english"
+      },
+      "accountType": {
+        "entityType": "Private Limited Company",
+        "incorpCountry": { "name": "Singapore" },
+        "operatingCountries": [{ "name": "Singapore" }, { "name": "Malaysia" }],
+        "sourceOfFunds": [{ "name": "Business Revenue" }],
+        "natureOfBusiness": "Software Development"
+      },
+      "documents": {
+        "companyNameEn": "Acme Pte Ltd",
+        "registrationNumber": "202012345K",
+        "dateOfEstablishment": "2020-01-15",
+        "registeredAddress": "1 Raffles Place, Singapore",
+        "certificateOfIncorporation": "https://storage.../cert.pdf"
+      },
+      "financialInfo": {
+        "sourceOfFundsTypes": ["Business Revenue", "Investments"],
+        "sourceOfWealth": ["Business Ownership"],
+        "estimatedAnnualTurnover": "$1M - $5M",
+        "accountPurpose": "Business Operations"
+      },
+      "connectedParties": {
+        "structureLevel": "Simple Structure - <= 3 layers",
+        "applicableRoles": ["director", "auth_person", "ubo"],
+        "connectedParties": [
+          {
+            "role": "director",
+            "firstName": "John",
+            "lastName": "Doe",
+            "email": "john@acme.com",
+            "nationality": { "name": "Singapore" }
+          }
+        ]
+      },
+      "corporateGovernance": {
+        "governanceChart": "https://storage.../chart.pdf",
+        "isDAO": false,
+        "conductedDueDiligence": true
+      },
+      "submittedAt": "2024-01-15T10:58:00Z",
+      "subjectType": "KYB"
+    }
+  }
+}
+```
+
+## Response Fields
+
+### Top-Level Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | string | Unique verification ID |
+| type | string | `kyc` or `kyb` |
+| subjectReference | string | Your reference ID |
+| status | string | Current status |
+| requestedAt | string | Creation timestamp |
+| resolvedAt | string \| null | Resolution timestamp |
+| resolutionNotes | string \| null | Notes if rejected/action needed |
+| subscriptionName | string | Plan name |
+| verificationUrl | string | Verification link |
+
+### Progress Object
+
+| Field | Type | Description |
+|-------|------|-------------|
+| currentStep | number | Current step index |
+| stepHistory | array | Completed steps with timestamps |
+| lastUpdated | string | Last progress update |
+| currentAccountTypeStep | number | KYB: Business Details sub-step |
+| currentDocumentStep | number | KYB: Document Upload sub-step |
+| currentFinancialStep | number | KYB: Financial Info sub-step |
+| currentConnectedPartiesStep | number | KYB: Connected Parties sub-step |
+| currentCorporateGovernanceStep | number | KYB: Corporate Governance sub-step |
+
+### Access Log Entry
+
+| Field | Type | Description |
+|-------|------|-------------|
+| timestamp | string | Access timestamp |
+| ip | string | Client IP address |
+| device | string | Device type |
+| browser | string | Browser info |
+| os | string | Operating system |
+
+### Submitted Data
+
+The `submittedData` object contains all data submitted by the user. Structure varies by verification type:
+
+#### KYC Data
+
+```json
+{
+  "residenceCountry": "Singapore",
+  "documentCountry": "Singapore",
+  "documentType": "passport",
+  "frontImageUrl": "https://...",
+  "backImageUrl": "https://...",
+  "selfieImageUrl": "https://...",
+  "livenessImages": ["https://..."],
+  "submittedAt": "2024-01-15T10:30:00Z"
+}
+```
+
+#### KYB Data
+
+```json
+{
+  "companyInfo": { ... },
+  "accountType": { ... },
+  "documents": { ... },
+  "financialInfo": { ... },
+  "connectedParties": { ... },
+  "corporateGovernance": { ... },
+  "submittedAt": "2024-01-15T10:30:00Z"
+}
+```
+
+## Error Responses
+
+### Not Found (404)
+
+```json
+{
+  "success": false,
+  "error": "Verification not found"
+}
+```
+
+## Use Cases
+
+This endpoint is ideal for:
+
+- **Detailed review** - View all submitted information
+- **Audit trails** - Access logs for compliance
+- **Progress tracking** - Monitor user progress through KYB flow
+- **Data export** - Extract verification data
+
+## Performance Considerations
+
+<Info>
+  This endpoint returns a large payload. Use the standard [Get Verification](/api-reference/verifications/get) endpoint for simple status checks.
+</Info>
+
+## Data Retention
+
+- Access logs: 90 days
+- Submitted documents: 7 years (compliance)
+- Verification records: Lifetime of relationship + 7 years

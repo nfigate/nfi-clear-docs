@@ -1,0 +1,125 @@
+---
+title: Quickstart
+description: 'Get started with NFI Clear API in under 5 minutes'
+---
+
+## Prerequisites
+
+Before you begin, make sure you have:
+
+- An active NFI Clear account
+- An active subscription with available verifications
+- An API key (create one in your dashboard)
+
+## Step 1: Create an API Key
+
+1. Log in to your NFI Clear dashboard
+2. Navigate to **API Keys** in the sidebar
+3. Click **Create New Key**
+4. Give your key a descriptive name (e.g., "Production API")
+5. Select permissions: `verifications:create` and `verifications:read`
+6. Copy the API key immediately (it's shown only once!)
+
+## Step 2: Create Your First Verification
+
+### cURL
+
+```bash
+curl -X POST 'https://api.nfi-clear.com/api/v1/verifications' \
+  -H 'X-API-Key: nfi_your_api_key_here' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "subjectType": "kyc",
+    "subjectReference": "user-12345",
+    "metadata": {
+      "customerId": "cus_12345"
+    }
+  }'
+```
+
+### Node.js
+
+```javascript
+const response = await fetch('https://api.nfi-clear.com/api/v1/verifications', {
+  method: 'POST',
+  headers: {
+    'X-API-Key': 'nfi_your_api_key_here',
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    subjectType: 'kyc',
+    subjectReference: 'user-12345',
+    metadata: {
+      customerId: 'cus_12345',
+    },
+  }),
+});
+
+const data = await response.json();
+console.log('Verification URL:', data.data.verificationUrl);
+```
+
+### Python
+
+```python
+import requests
+
+response = requests.post(
+    'https://api.nfi-clear.com/api/v1/verifications',
+    headers={
+        'X-API-Key': 'nfi_your_api_key_here',
+        'Content-Type': 'application/json',
+    },
+    json={
+        'subjectType': 'kyc',
+        'subjectReference': 'user-12345',
+        'metadata': {
+            'customerId': 'cus_12345',
+        },
+    }
+)
+
+data = response.json()
+print('Verification URL:', data['data']['verificationUrl'])
+```
+
+## Step 3: Send the Verification Link
+
+The API response includes a `verificationUrl`:
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "abc123...",
+    "type": "kyc",
+    "subjectReference": "user-12345",
+    "status": "pending",
+    "verificationUrl": "https://app.nfi-clear.com/verify/abc123...",
+    "requestedAt": "2024-01-15T10:30:00Z"
+  },
+  "message": "Verification created successfully"
+}
+```
+
+Send this URL to your user via email, SMS, or in-app notification.
+
+## Step 4: Check Verification Status
+
+Poll for status updates:
+
+```bash
+curl 'https://api.nfi-clear.com/api/v1/verifications/abc123...' \
+  -H 'X-API-Key: nfi_your_api_key_here'
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Authentication" icon="lock" href="/authentication">
+    Learn more about API authentication
+  </Card>
+  <Card title="API Reference" icon="code" href="/api-reference/overview">
+    Explore all available endpoints
+  </Card>
+</CardGroup>
