@@ -31,7 +31,7 @@ GET /api/v1/verifications/{id}
 ### Example Request
 
 ```bash
-curl 'https://api.nfi-clear.com/api/v1/verifications/abc123def456' \
+curl 'https://clear-api.nfigate.com/api/v1/verifications/abc123def456' \
   -H 'X-API-Key: nfi_your_api_key_here'
 ```
 
@@ -120,7 +120,7 @@ If you must poll, use an exponential backoff strategy:
 ```javascript
 const checkStatus = async (verificationId, attempt = 0) => {
   const response = await fetch(
-    `https://api.nfi-clear.com/api/v1/verifications/${verificationId}`,
+    `https://clear-api.nfigate.com/api/v1/verifications/${verificationId}`,
     {
       headers: { 'X-API-Key': 'nfi_your_api_key' }
     }

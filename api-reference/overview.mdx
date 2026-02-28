@@ -10,7 +10,7 @@ The NFI Clear API is organized around REST. Our API has predictable resource-ori
 ## Base URL
 
 ```
-https://api.nfi-clear.com/api/v1
+https://clear-api.nfigate.com/api/v1
 ```
 
 ## Content Type
@@ -68,7 +68,7 @@ All API responses follow a consistent format:
 List endpoints support pagination using `page` and `limit` query parameters:
 
 ```bash
-curl 'https://api.nfi-clear.com/api/v1/verifications?page=1&limit=20' \
+curl 'https://clear-api.nfigate.com/api/v1/verifications?page=1&limit=20' \
   -H 'X-API-Key: nfi_your_api_key'
 ```
 
@@ -104,7 +104,7 @@ Use query parameters to filter results:
 
 Example:
 ```bash
-curl 'https://api.nfi-clear.com/api/v1/verifications?status=pending&type=kyc' \
+curl 'https://clear-api.nfigate.com/api/v1/verifications?status=pending&type=kyc' \
   -H 'X-API-Key: nfi_your_api_key'
 ```
 

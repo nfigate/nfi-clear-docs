@@ -110,7 +110,7 @@ const checkStatus = async (id) => {
 class VerificationService {
   async createVerification(user) {
     // Create verification
-    const response = await fetch('https://api.nfi-clear.com/api/v1/verifications', {
+    const response = await fetch('https://clear-api.nfigate.com/api/v1/verifications', {
       method: 'POST',
       headers: {
         'X-API-Key': API_KEY,
@@ -145,7 +145,7 @@ class VerificationService {
   
   async checkStatus(verificationId) {
     const response = await fetch(
-      `https://api.nfi-clear.com/api/v1/verifications/${verificationId}`,
+      `https://clear-api.nfigate.com/api/v1/verifications/${verificationId}`,
       {
         headers: { 'X-API-Key': API_KEY },
       }

@@ -28,7 +28,7 @@ flowchart TD
 Your application creates a verification via API:
 
 ```bash
-curl -X POST 'https://api.nfi-clear.com/api/v1/verifications' \
+curl -X POST 'https://clear-api.nfigate.com/api/v1/verifications' \
   -H 'X-API-Key: nfi_...' \
   -d '{
     "subjectType": "kyc",
@@ -212,7 +212,7 @@ Review time: Typically 1-5 minutes for automated checks, up to 24 hours for manu
 ```javascript
 // Create KYC verification
 const createKycVerification = async (user) => {
-  const response = await fetch('https://api.nfi-clear.com/api/v1/verifications', {
+  const response = await fetch('https://clear-api.nfigate.com/api/v1/verifications', {
     method: 'POST',
     headers: {
       'X-API-Key': API_KEY,
