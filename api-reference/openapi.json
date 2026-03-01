@@ -10,7 +10,7 @@
   },
   "servers": [
     {
-      "url": "https://api.nfi-clear.com/api/v1",
+      "url": "https://clear-api.nfigate.com/api/v1",
       "description": "Production server"
     }
   ],
