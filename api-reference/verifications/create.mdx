@@ -60,7 +60,7 @@ Create a new verification request for an individual (KYC) or business (KYB).
 ### cURL
 
 ```bash
-curl -X POST 'https://api.nfi-clear.com/api/v1/verifications' \
+curl -X POST 'https://clear-api.nfigate.com/api/v1/verifications' \
   -H 'X-API-Key: nfi_your_api_key_here' \
   -H 'Content-Type: application/json' \
   -d '{
@@ -75,7 +75,7 @@ curl -X POST 'https://api.nfi-clear.com/api/v1/verifications' \
 ### JavaScript
 
 ```javascript
-const response = await fetch('https://api.nfi-clear.com/api/v1/verifications', {
+const response = await fetch('https://clear-api.nfigate.com/api/v1/verifications', {
   method: 'POST',
   headers: {
     'X-API-Key': 'nfi_your_api_key_here',
