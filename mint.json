@@ -1,10 +1,10 @@
 {
   "name": "NFI Clear API",
   "logo": {
-    "dark": "/logo/dark.svg",
-    "light": "/logo/light.svg"
+    "dark": "logo/dark.svg",
+    "light": "logo/light.svg"
   },
-  "favicon": "/favicon.svg",
+  "favicon": "favicon.svg",
   "colors": {
     "primary": "#00b262",
     "light": "#22C55E",
@@ -14,6 +14,7 @@
       "light": "#FAFBFC"
     }
   },
+  "openapi": "api-reference/openapi.json",
   "navigation": [
     {
       "group": "Getting Started",

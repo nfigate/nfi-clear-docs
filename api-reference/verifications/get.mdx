@@ -1,43 +1,22 @@
 ---
 title: Get Verification
-description: 'Get basic verification status'
-api: 'GET /api/v1/verifications/{id}'
+description: 'Get verification status and basic details'
+openapi: 'GET /verifications/{id}'
 ---
 
 # Get Verification
 
 Retrieve the current status and basic information about a specific verification.
 
-## Endpoint
+## Request
 
-```http
-GET /api/v1/verifications/{id}
-```
-
-## Path Parameters
+### Path Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | id | string | Yes | The verification ID |
 
-## Request
-
-### Headers
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| X-API-Key | Yes | Your API key |
-
-### Example Request
-
-```bash
-curl 'https://clear-api.nfigate.com/api/v1/verifications/abc123def456' \
-  -H 'X-API-Key: nfi_your_api_key_here'
-```
-
 ## Response
-
-### Success (200 OK)
 
 ```json
 {
@@ -53,100 +32,47 @@ curl 'https://clear-api.nfigate.com/api/v1/verifications/abc123def456' \
     "verificationUrl": "https://app.nfi-clear.com/verify/abc123def456",
     "submittedData": {
       "residenceCountry": "Singapore",
-      "documentCountry": "Singapore",
-      "documentType": "passport",
-      "frontImageUrl": "https://...",
-      "selfieImageUrl": "https://..."
+      "documentType": "passport"
     }
   }
 }
 ```
-
-### Response Fields
-
-| Field | Type | Description |
-|-------|------|-------------|
-| id | string | Unique verification ID |
-| type | string | `kyc` or `kyb` |
-| subjectReference | string | Your reference ID |
-| status | string | Current status |
-| requestedAt | string | Creation timestamp |
-| resolvedAt | string \| null | Resolution timestamp |
-| currentStep | number | Current step in flow |
-| verificationUrl | string | Verification link |
-| submittedData | object \| undefined | Data for completed verifications |
 
 ## Status Values
 
 | Status | Description |
 |--------|-------------|
 | `pending` | Verification created, user hasn't started |
-| `submitted` | User completed the form, pending review |
+| `submitted` | User completed, pending review |
 | `action_needed` | Reviewer requested corrections |
 | `approved` | Verification approved |
 | `rejected` | Verification rejected |
 
-## Error Responses
+## Example
 
-### Not Found (404)
+### cURL
 
-```json
-{
-  "success": false,
-  "error": "Verification not found"
-}
+```bash
+curl 'https://api.nfi-clear.com/api/v1/verifications/abc123def456' \
+  -H 'X-API-Key: nfi_your_api_key_here'
 ```
 
-<Warning>
-  This endpoint returns a simplified view. For complete details including progress tracking and access logs, use the [Get Full Details](/api-reference/verifications/details) endpoint.
-</Warning>
-
-## Use Cases
-
-This endpoint is ideal for:
-
-- **Status polling** - Check if verification is complete
-- **Dashboard display** - Show verification status to users
-- **Status checks** - Before allowing user actions
-
-## Polling Strategy
-
-<Info>
-  For real-time updates, use [webhooks](/webhooks) instead of polling.
-</Info>
-
-If you must poll, use an exponential backoff strategy:
+### JavaScript
 
 ```javascript
-const checkStatus = async (verificationId, attempt = 0) => {
-  const response = await fetch(
-    `https://clear-api.nfigate.com/api/v1/verifications/${verificationId}`,
-    {
-      headers: { 'X-API-Key': 'nfi_your_api_key' }
-    }
-  );
-  
-  const data = await response.json();
-  
-  if (data.data.status === 'approved' || data.data.status === 'rejected') {
-    return data.data; // Final status reached
+const response = await fetch(
+  'https://api.nfi-clear.com/api/v1/verifications/abc123def456',
+  {
+    headers: { 'X-API-Key': 'nfi_your_api_key_here' }
   }
-  
-  // Exponential backoff: 5s, 10s, 20s, 30s (max)
-  const delay = Math.min(5000 * Math.pow(2, attempt), 30000);
-  
-  await new Promise(resolve => setTimeout(resolve, delay));
-  return checkStatus(verificationId, attempt + 1);
-};
+);
+
+const data = await response.json();
+console.log('Status:', data.data.status);
 ```
 
-## Next Steps
+## Error Responses
 
-<CardGroup cols={2}>
-  <Card title="Get Full Details" icon="file-text" href="/api-reference/verifications/details">
-    Retrieve complete verification data
-  </Card>
-  <Card title="Webhooks" icon="webhook" href="/webhooks">
-    Set up real-time notifications
-  </Card>
-</CardGroup>
+| Status | Code | Description |
+|--------|------|-------------|
+| 404 | `VERIFICATION_NOT_FOUND` | Verification ID not found |

@@ -1,0 +1,402 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "NFI Clear API",
+    "description": "Identity verification platform for KYC and KYB",
+    "version": "1.0.0",
+    "contact": {
+      "email": "support@nfi-clear.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.nfi-clear.com/api/v1",
+      "description": "Production server"
+    }
+  ],
+  "security": [
+    {
+      "ApiKeyAuth": []
+    }
+  ],
+  "paths": {
+    "/verifications": {
+      "post": {
+        "summary": "Create Verification",
+        "description": "Create a new KYC or KYB verification",
+        "operationId": "createVerification",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateVerificationRequest"
+              },
+              "examples": {
+                "kyc": {
+                  "summary": "KYC Verification",
+                  "value": {
+                    "subjectType": "kyc",
+                    "subjectReference": "user-12345",
+                    "metadata": {
+                      "customerId": "cus_12345"
+                    }
+                  }
+                },
+                "kyb": {
+                  "summary": "KYB Verification",
+                  "value": {
+                    "subjectType": "kyb",
+                    "subjectReference": "company-67890",
+                    "metadata": {
+                      "companyId": "comp_67890"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Verification created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerificationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid API key"
+          },
+          "403": {
+            "description": "Forbidden - Subscription issue"
+          },
+          "409": {
+            "description": "Conflict - Duplicate subject reference"
+          }
+        }
+      },
+      "get": {
+        "summary": "List Verifications",
+        "description": "List all verifications with filtering and pagination",
+        "operationId": "listVerifications",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["pending", "submitted", "action_needed", "approved", "rejected"]
+            },
+            "description": "Filter by status"
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["kyc", "kyb"]
+            },
+            "description": "Filter by type"
+          },
+          {
+            "name": "subjectReference",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search by subject reference"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Page number"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "maximum": 100
+            },
+            "description": "Items per page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of verifications",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerificationListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/verifications/{id}": {
+      "get": {
+        "summary": "Get Verification",
+        "description": "Get verification status and basic details",
+        "operationId": "getVerification",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Verification ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Verification details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerificationResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Verification not found"
+          }
+        }
+      }
+    },
+    "/verifications/{id}/details": {
+      "get": {
+        "summary": "Get Verification Details",
+        "description": "Get complete verification details with progress and submitted data",
+        "operationId": "getVerificationDetails",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Verification ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Complete verification details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerificationDetailsResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Verification not found"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key",
+        "description": "Your API key from the dashboard"
+      }
+    },
+    "schemas": {
+      "CreateVerificationRequest": {
+        "type": "object",
+        "required": ["subjectType", "subjectReference"],
+        "properties": {
+          "subjectType": {
+            "type": "string",
+            "enum": ["kyc", "kyb"],
+            "description": "Type of verification"
+          },
+          "subjectReference": {
+            "type": "string",
+            "description": "Your unique identifier"
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Additional data"
+          }
+        }
+      },
+      "Verification": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["kyc", "kyb"]
+          },
+          "subjectReference": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "submitted", "action_needed", "approved", "rejected"]
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "resolvedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "currentStep": {
+            "type": "integer"
+          },
+          "verificationUrl": {
+            "type": "string"
+          },
+          "submittedData": {
+            "type": "object"
+          }
+        }
+      },
+      "VerificationResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "$ref": "#/components/schemas/Verification"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "VerificationListResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "verifications": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Verification"
+                }
+              },
+              "pagination": {
+                "type": "object",
+                "properties": {
+                  "page": {
+                    "type": "integer"
+                  },
+                  "limit": {
+                    "type": "integer"
+                  },
+                  "totalCount": {
+                    "type": "integer"
+                  },
+                  "totalPages": {
+                    "type": "integer"
+                  },
+                  "hasMore": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "VerificationDetailsResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "subjectReference": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string"
+              },
+              "requestedAt": {
+                "type": "string"
+              },
+              "verificationUrl": {
+                "type": "string"
+              },
+              "progress": {
+                "type": "object"
+              },
+              "submittedData": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}

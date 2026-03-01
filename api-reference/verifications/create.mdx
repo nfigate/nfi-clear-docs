@@ -1,18 +1,12 @@
 ---
 title: Create Verification
 description: 'Create a new KYC or KYB verification'
-api: 'POST /api/v1/verifications'
+openapi: 'POST /verifications'
 ---
 
 # Create Verification
 
 Create a new verification request for an individual (KYC) or business (KYB).
-
-## Endpoint
-
-```http
-POST /api/v1/verifications
-```
 
 ## Request
 
@@ -25,28 +19,21 @@ POST /api/v1/verifications
 
 ### Body Parameters
 
+```json
+{
+  "subjectType": "kyc",
+  "subjectReference": "user-12345",
+  "metadata": {
+    "customerId": "cus_12345"
+  }
+}
+```
+
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | subjectType | string | Yes | Type of verification: `kyc` or `kyb` |
 | subjectReference | string | Yes | Your unique identifier for this subject |
 | metadata | object | No | Additional data to store with the verification |
-
-### Example Request
-
-```bash
-curl -X POST 'https://clear-api.nfigate.com/api/v1/verifications' \
-  -H 'X-API-Key: nfi_your_api_key_here' \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "subjectType": "kyc",
-    "subjectReference": "user-12345",
-    "metadata": {
-      "customerId": "cus_12345",
-      "source": "mobile_app",
-      "userEmail": "user@example.com"
-    }
-  }'
-```
 
 ## Response
 
@@ -68,98 +55,48 @@ curl -X POST 'https://clear-api.nfigate.com/api/v1/verifications' \
 }
 ```
 
-### Response Fields
+## Example
 
-| Field | Type | Description |
-|-------|------|-------------|
-| id | string | Unique verification ID |
-| type | string | `kyc` or `kyb` |
-| subjectReference | string | Your reference ID |
-| status | string | Current status: `pending` |
-| requestedAt | string | ISO 8601 timestamp |
-| currentStep | number | Current step in verification flow |
-| verificationUrl | string | URL to send to the user |
+### cURL
+
+```bash
+curl -X POST 'https://api.nfi-clear.com/api/v1/verifications' \
+  -H 'X-API-Key: nfi_your_api_key_here' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "subjectType": "kyc",
+    "subjectReference": "user-12345",
+    "metadata": {
+      "customerId": "cus_12345"
+    }
+  }'
+```
+
+### JavaScript
+
+```javascript
+const response = await fetch('https://api.nfi-clear.com/api/v1/verifications', {
+  method: 'POST',
+  headers: {
+    'X-API-Key': 'nfi_your_api_key_here',
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    subjectType: 'kyc',
+    subjectReference: 'user-12345',
+  }),
+});
+
+const data = await response.json();
+console.log('Verification URL:', data.data.verificationUrl);
+```
 
 ## Error Responses
 
-### Invalid Subject Type (400)
-
-```json
-{
-  "success": false,
-  "error": "subjectType must be \"kyc\" or \"kyb\""
-}
-```
-
-### Missing Subject Reference (400)
-
-```json
-{
-  "success": false,
-  "error": "subjectReference is required"
-}
-```
-
-### No Active Subscription (403)
-
-```json
-{
-  "success": false,
-  "error": "No active subscription",
-  "code": "NO_ACTIVE_SUBSCRIPTION"
-}
-```
-
-### Limit Exceeded (403)
-
-```json
-{
-  "success": false,
-  "error": "Verification limit exceeded. Please upgrade your subscription.",
-  "code": "LIMIT_EXCEEDED"
-}
-```
-
-### Duplicate Subject Reference (409)
-
-```json
-{
-  "success": false,
-  "error": "An active verification already exists for this subject reference",
-  "code": "DUPLICATE_SUBJECT_REFERENCE",
-  "data": {
-    "existingVerificationId": "abc123..."
-  }
-}
-```
-
-## Flow
-
-After creating a verification:
-
-1. Store the `id` in your database
-2. Send the `verificationUrl` to your user
-3. User completes the verification form
-4. Receive webhook notification on completion
-5. Fetch full details using [Get Details](/api-reference/verifications/details) endpoint
-
-## Metadata Usage
-
-The `metadata` field accepts any JSON object. This is useful for:
-
-- Storing your internal IDs
-- Tracking the source of the verification
-- Adding custom tags
-- Storing user contact information
-
-<Info>
-  Metadata is returned in all verification responses and webhook payloads.
-</Info>
-
-## Next Steps
-
-<CardGroup cols={2}>
-  <Card title="List Verifications" icon="list" href="/api-reference/verifications/list">
-    View all your verifications
-  </Card>
-</CardGroup>
+| Status | Code | Description |
+|--------|------|-------------|
+| 400 | `INVALID_SUBJECT_TYPE` | subjectType must be "kyc" or "kyb" |
+| 400 | `MISSING_SUBJECT_REFERENCE` | subjectReference is required |
+| 403 | `NO_ACTIVE_SUBSCRIPTION` | No active subscription found |
+| 403 | `LIMIT_EXCEEDED` | Monthly verification limit reached |
+| 409 | `DUPLICATE_SUBJECT_REFERENCE` | Active verification already exists |
